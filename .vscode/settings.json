@@ -1,7 +1,15 @@
 {
+  "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
-  }
+  },
+  "material-icon-theme.folders.associations": {
+    "queries": "keys",
+    "stores": "context",
+    "features": "app",
+    "conversations": "",
+    "history": "",
+  },
 }
