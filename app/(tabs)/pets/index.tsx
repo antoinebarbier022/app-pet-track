@@ -1,12 +1,16 @@
+import { usePets } from "@/features/pet/hooks/use-pets";
 import { Link, Stack } from "expo-router";
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-const DATA = [
-  { id: '1', title: 'Coppa' },
-  { id: '2', title: 'Sushi' },
-];
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Index() {
+  const { data } = usePets();
   return (
     <View
       style={{
@@ -18,40 +22,41 @@ export default function Index() {
       <Stack.Screen
         options={{
           headerShown: true,
-          title: 'Mes Animaux',
+          title: "Mes Animaux",
           headerRight: () => (
-            <Link href="/home/add-pet" asChild>
+            <Link href="/pets/add-pet" asChild>
               <TouchableOpacity style={styles.addButton}>
-                <Text style={{ color: 'white' }}>Ajouter</Text>
+                <Text style={{ color: "white" }}>Ajouter</Text>
               </TouchableOpacity>
             </Link>
           ),
         }}
       />
       <FlatList
-        data={DATA}
-        keyExtractor={(item) => item.id}
+        data={data}
+        keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
           <Link
             asChild
             href={{
-              pathname: '/home/pet/[id]',
-              params: { id: item.title, name: item.title }
+              pathname: "/pets/pet-detail",
+              params: { id: item.id, name: item.name },
             }}
             style={styles.item}
-
           >
-            <TouchableOpacity >
-              <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
+            <TouchableOpacity>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+              >
                 <Image
                   source={{
-                    uri: 'https://reactnative.dev/docs/assets/p_cat2.png',
+                    uri: "https://reactnative.dev/docs/assets/p_cat2.png",
                   }}
                   style={{ width: 40, height: 40 }}
                 />
                 <View>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <Text>Link to {item.title} page</Text>
+                  <Text style={styles.title}>{item.name}</Text>
+                  <Text>Link to {item.name} page</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -59,19 +64,17 @@ export default function Index() {
         )}
         style={{ width: "100%", flex: 1, backgroundColor: "silver" }}
       />
-
-
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: "#fff" },
   item: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: '#fff',
+    borderBottomColor: "#eee",
+    backgroundColor: "#fff",
   },
   title: { fontSize: 18 },
   addButton: { padding: 10, borderRadius: 8 },

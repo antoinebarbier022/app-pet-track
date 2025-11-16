@@ -6,10 +6,10 @@
     "source.sortMembers": "explicit"
   },
   "material-icon-theme.folders.associations": {
-    "queries": "keys",
     "stores": "context",
-    "features": "app",
-    "conversations": "",
-    "history": "",
+    "features": "app"
   },
+  "material-icon-theme.files.associations": {
+  "_layout.tsx": "routing"
+}
 }
