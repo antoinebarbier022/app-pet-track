@@ -20,10 +20,9 @@ export default function AddPet() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Nom de l'animal</Text>
+    <View style={{ flex: 1, flexDirection: "column", padding: 16 }}>
+      <Text style={styles.label}>Nom de l&apos;animal</Text>
       <TextInput style={styles.input} value={name} onChangeText={setName} />
-      <Text style={styles.label}>Date de naissance</Text>
       <View style={{ marginTop: 16 }}>
         <Button title="Ajouter" onPress={handleAdd} />
       </View>
@@ -32,7 +31,6 @@ export default function AddPet() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, flexDirection: "column", padding: 16 },
   label: { fontSize: 16, marginTop: 16 },
   input: {
     borderWidth: 1,

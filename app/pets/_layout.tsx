@@ -9,9 +9,11 @@ export default function PetLayout() {
     <>
       <Stack
         screenOptions={{
+          headerShown: false,
           headerStyle: {
-            backgroundColor: "#f4511e",
+            backgroundColor: "#FCD6B0",
           },
+
           headerTintColor: "#fff",
           headerTitleStyle: {
             fontWeight: "bold",
