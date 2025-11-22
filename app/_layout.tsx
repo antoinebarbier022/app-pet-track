@@ -1,5 +1,5 @@
 //import migrations from "@/db/drizzle/migrations";
-import migrations from "@/db/drizzle/migrations";
+import migrations from "@/drizzle/migrations";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";

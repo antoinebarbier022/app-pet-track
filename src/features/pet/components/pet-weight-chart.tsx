@@ -1,132 +1,159 @@
-import React, { useMemo } from "react";
+import roboto from "@/assets/fonts/Roboto/roboto.ttf";
+import {
+  Circle,
+  LinearGradient,
+  useFont,
+  vec,
+} from "@shopify/react-native-skia";
+import { useMemo } from "react";
 import { Dimensions, View } from "react-native";
-
-import { CurveType, LineChart } from "react-native-gifted-charts";
+import { type SharedValue } from "react-native-reanimated";
+import {
+  Area,
+  CartesianChart,
+  Line,
+  Scatter,
+  useChartPressState,
+} from "victory-native";
 import { PetWithWeights } from "../types";
 
-export type Point = {
-  value: number;
+type Point = {
+  day: number;
+  weight: number;
   date: Date;
-  hideDataPoint?: boolean;
 };
 
 interface Props {
   data: PetWithWeights;
-  onPointPress?: (data: Point | null) => void;
-  onPointLeave?: () => void;
-  onPointEnter?: () => void;
+  chartPress: ReturnType<
+    typeof useChartPressState<{
+      x: number;
+      y: {
+        weight: number;
+      };
+    }>
+  >;
 }
-export const PetWeightChart = ({
-  data,
-  onPointPress,
-  onPointLeave,
-  onPointEnter,
-}: Props) => {
-  const { width } = Dimensions.get("window");
 
+export const PetWeightChart = ({ data, chartPress }: Props) => {
+  const { state, isActive } = chartPress;
+
+  const { width } = Dimensions.get("window");
   const chartData = useMemo(() => {
     return data.weights.map((w, idx) => {
       return {
-        value: Number(w.weightKg),
+        day: idx + 1,
+        weight: Number(w.weightKg),
         date: new Date(w.recordedAt),
-        hideDataPoint: data.weights.length !== 1,
       } as Point;
     });
   }, [data.weights]);
 
-  const chartWidth = width * 0.8;
+  const maxWeight = useMemo(() => {
+    return Math.max(...chartData.map((p) => p.weight));
+  }, [chartData]);
+
+  const yAxisfont = useFont(roboto, 12);
+
+  const curveType = "monotoneX";
+  const animate = {
+    type: "timing",
+    duration: 500,
+  };
 
   return (
-    <View
-      style={{
-        paddingTop: 20,
-        backgroundColor: "transparent",
-      }}
-    >
-      <LineChart
-        curved
-        curveType={CurveType.QUADRATIC}
-        thickness={3}
-        color="#E97E20"
-        maxValue={Math.max(...data.weights.map((w) => Number(w.weightKg))) + 1}
-        noOfSections={3}
-        // animation
-        isAnimated
-        //animateOnDataChange there is a bug on the second insertion
-        animationDuration={1000}
-        pointerConfig={{
-          radius: 4,
-
-          onResponderEnd: onPointLeave,
-          onResponderGrant: onPointEnter,
-
-          pointerComponent: () => (
-            <View
-              style={{
-                height: 8,
-                width: 8,
-                borderRadius: 8,
-                backgroundColor: "#e15108",
-                outlineWidth: 5,
-                outlineColor: "#e97e205f",
-                transform: [{ translateX: 0 }, { translateY: 1 }],
-                borderColor: "white",
-              }}
-            />
-          ),
-
-          pointerStripColor: "transparent",
-          pointerColor: "#3A2109",
-          persistPointer: false,
-
-          //   pointerLabelComponent: (items: Point[]) => {
-          //     onPointPress?.({ value: items[0].value, date: items[0].date });
-          //     return (
-          //       <View
-          //         style={{
-          //           height: 40,
-          //           width: 60,
-          //           backgroundColor: "#282C3E",
-          //           borderRadius: 4,
-          //           justifyContent: "center",
-          //           paddingLeft: 16,
-          //           transform: [{ translateY: -15 }],
-          //         }}
-          //       >
-          //         <Text style={{ color: "lightgray", fontSize: 12 }}>kg</Text>
-          //         <Text style={{ color: "white", fontWeight: "bold" }}>
-          //           {items[0].value}
-          //         </Text>
-          //       </View>
-          //     );
-          //   },
-        }}
+    <View style={{ height: 280, width: width, marginLeft: "auto" }}>
+      <CartesianChart
         data={chartData}
-        // Area
-        areaChart
-        startFillColor={"rgba(255, 153, 63, 1)"}
-        endFillColor={"rgba(255, 153, 63, 1)"}
-        startOpacity={0.6}
-        endOpacity={0.05}
-        initialSpacing={data.weights.length > 1 ? 0 : chartWidth / 2}
-        spacing={
-          data.weights.length > 1
-            ? chartWidth / (data.weights.length - 1)
-            : chartWidth
-        }
-        backgroundColor="transparent"
-        rulesColor="#edc093"
-        rulesType="dashed"
-        xAxisColor="#F2C79D"
-        width={chartWidth}
-        showVerticalLines
-        verticalLinesColor="#F2C79D"
-        verticalLinesThickness={1}
-        yAxisLabelSuffix="kg"
-        yAxisTextStyle={{ color: "#936941" }}
-        yAxisLabelWidth={40}
-        yAxisThickness={0}
-      />
+        xKey="day"
+        yKeys={["weight"]}
+        domainPadding={{ top: 0, left: 12, right: 12, bottom: 12 }}
+        chartPressState={state}
+        viewport={{ y: [0, maxWeight + 1] }}
+        padding={{ left: 20, right: 20, bottom: 10 }}
+        yAxis={[
+          {
+            font: yAxisfont,
+            formatYLabel: (label) => label.toFixed(1) + " kg",
+            lineColor: "#daad807b",
+            lineWidth: 0.5,
+            labelPosition: "outset",
+
+            axisSide: "left",
+            tickCount: 6,
+
+            domain: [0, maxWeight],
+            labelColor: "#936941",
+            labelOffset: 0,
+          },
+        ]}
+        xAxis={{
+          lineColor: undefined,
+          lineWidth: 0,
+        }}
+      >
+        {/* 👇 render function exposes various data, such as points. */}
+        {({ points, chartBounds }) => (
+          <>
+            <Area
+              points={points.weight}
+              curveType={curveType}
+              y0={chartBounds.bottom}
+              animate={animate}
+            >
+              <LinearGradient
+                start={vec(chartBounds.bottom, chartBounds.top)}
+                end={vec(chartBounds.bottom, chartBounds.bottom)}
+                colors={["rgba(255, 153, 63, 0.6)", "rgba(255, 153, 63, 0)"]}
+              />
+            </Area>
+            <Line
+              points={points.weight}
+              color="#E97E20"
+              curveType={curveType}
+              strokeWidth={3}
+              animate={animate}
+            />
+            {points.weight.length <= 10 && (
+              <>
+                <Scatter
+                  points={points.weight}
+                  shape="circle"
+                  radius={3}
+                  style="stroke"
+                  strokeWidth={4}
+                  color="#E97E20"
+                  opacity={1}
+                  animate={animate}
+                />
+                <Scatter
+                  points={points.weight}
+                  shape="circle"
+                  radius={3}
+                  style="fill"
+                  strokeWidth={2}
+                  opacity={1}
+                  color="#FCD6B0"
+                  animate={animate}
+                />
+              </>
+            )}
+
+            {isActive ? (
+              <ToolTip x={state.x.position} y={state.y.weight.position} />
+            ) : null}
+          </>
+        )}
+      </CartesianChart>
     </View>
   );
 };
+
+function ToolTip({ x, y }: { x: SharedValue<number>; y: SharedValue<number> }) {
+  return (
+    <>
+      <Circle cx={x} cy={y} r={4} color="#e15108" />
+      <Circle cx={x} cy={y} r={10} color="#e97e205f" />
+    </>
+  );
+}
