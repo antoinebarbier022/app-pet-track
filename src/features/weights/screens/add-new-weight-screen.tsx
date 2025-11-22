@@ -1,5 +1,4 @@
-import { useAddWeightToPet } from "@/features/pet/hooks/use-add-weight-to-pet";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useAddWeightToPet } from "@/features/pets/hooks/use-add-weight-to-pet";
 import { ChevronDown } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -15,15 +14,15 @@ import {
 
 import { DatePicker } from "@/components/ui/date-picker";
 
-export default function AddWeight() {
-  const router = useRouter();
+interface Props {
+  petId: string;
+  petName: string;
+  onClose: () => void;
+}
+export const AddNewWeightScreen = ({ petId, petName, onClose }: Props) => {
   const [weightKg, setWeightKg] = useState("");
 
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const { petId, name } = useLocalSearchParams<{
-    petId: string;
-    name: string;
-  }>();
 
   const addWeightToPet = useAddWeightToPet();
 
@@ -34,6 +33,13 @@ export default function AddWeight() {
       console.log("Missing weight or pet ID", { weightKg, petId });
       return;
     }
+    console.log({
+      petId: Number(petId),
+      weight: {
+        weightKg: Number(weightKg.replace(",", ".")),
+        recordedAt: selectedDate,
+      },
+    });
     addWeightToPet({
       petId: Number(petId),
       weight: {
@@ -43,7 +49,7 @@ export default function AddWeight() {
     });
 
     console.log({ weightKg, recordedAt: selectedDate });
-    router.back();
+    onClose();
   };
 
   return (
@@ -72,11 +78,11 @@ export default function AddWeight() {
               }}
             >
               Nouveau poids de{"\u00A0"}
-              {name}
+              {petName}
             </Text>
             <Pressable
               style={{ padding: 16, borderRadius: 8 }}
-              onPress={() => router.back()}
+              onPress={onClose}
             >
               <ChevronDown size={32} />
             </Pressable>
@@ -130,7 +136,6 @@ export default function AddWeight() {
                 defaultValue={weightKg}
                 onChangeText={(value: string) => {
                   setWeightKg(value);
-                  12;
                 }}
                 keyboardType="numeric"
               />
@@ -191,7 +196,7 @@ export default function AddWeight() {
       </View>
     </KeyboardAvoidingView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

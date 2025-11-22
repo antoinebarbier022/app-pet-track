@@ -4,7 +4,7 @@ export const unstable_settings = {
   initialRouteName: "index",
 };
 
-export default function PetsLayout() {
+export default function PetLayout() {
   return (
     <>
       <Stack
@@ -21,11 +21,7 @@ export default function PetsLayout() {
         }}
       >
         <Stack.Screen
-          name="create"
-          options={{ presentation: "modal", title: "Ajouter un animal" }}
-        />
-        <Stack.Screen
-          name="/[petId]/add-weight"
+          name="add-weight"
           options={{ presentation: "modal", title: "Ajouter un poids" }}
         />
       </Stack>

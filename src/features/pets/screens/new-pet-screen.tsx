@@ -1,10 +1,13 @@
-import { useAddPet } from "@/features/pet/hooks/use-add-pet";
-import { Pet } from "@/features/pet/types";
+import { useAddPet } from "@/features/pets/hooks/use-add-pet";
+import { Pet } from "@/features/pets/types";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 
-export default function AddPet() {
+interface Props {
+  onCreated: () => void;
+}
+export const NewPetScreen = ({ onCreated }: Props) => {
   const router = useRouter();
   const [name, setName] = useState("");
   const [type, setType] = useState<Pet["type"]>("cat");
@@ -14,9 +17,8 @@ export default function AddPet() {
 
   const handleAdd = () => {
     addPet({ name, type, birthDate });
-
     console.log({ name, type, birthDate });
-    router.back();
+    onCreated();
   };
 
   return (
@@ -28,7 +30,7 @@ export default function AddPet() {
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   label: { fontSize: 16, marginTop: 16 },

@@ -1,27 +1,18 @@
-import { PetList } from "@/features/pet/components/pet-list";
-import { usePets } from "@/features/pet/hooks/use-pets";
-import { Link, Stack } from "expo-router";
-
+import { PetCreationFab } from "@/features/pets/components/pet-creation-fab";
+import { PetListScreen } from "@/features/pets/screens/pet-list-screen";
+import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Plus } from "lucide-react-native";
-import { Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Text, View } from "react-native";
+
 export default function Index() {
-  const { data } = usePets();
-  const insets = useSafeAreaInsets();
+  const router = useRouter();
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#170D03",
-      }}
-    >
+    <>
       <StatusBar style="light" />
       <Stack.Screen
         options={{
           headerShown: true,
           navigationBarHidden: true,
-
           title: "Mes compagnons",
           headerShadowVisible: false,
           headerStyle: {
@@ -45,35 +36,17 @@ export default function Index() {
           headerTitleAlign: "left",
         }}
       />
-
-      <PetList data={data || []} />
-
-      <Link href="/pets/add-pet" asChild>
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#FCD6B0",
-
-            borderRadius: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "absolute",
-            bottom: insets.bottom, // distance par rapport au bas de l'écran
-            alignSelf: "center", // centre horizontalement
-
-            width: 68,
-            height: 68,
-
-            elevation: 5, // ombre Android
-            shadowColor: "#000", // ombre iOS
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.3,
-            shadowRadius: 3,
-          }}
-        >
-          <Plus size={32} color="#3A2109" />
-        </TouchableOpacity>
-      </Link>
-    </View>
+      <PetListScreen
+        onPetPress={(petId: string, petName: string) =>
+          router.push({
+            pathname: "/pets/[petId]",
+            params: { petId, petName },
+          })
+        }
+      />
+      <PetCreationFab
+        onPress={() => router.push({ pathname: "/pets/create" })}
+      />
+    </>
   );
 }

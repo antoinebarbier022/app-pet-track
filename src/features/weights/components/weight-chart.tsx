@@ -15,7 +15,7 @@ import {
   Scatter,
   useChartPressState,
 } from "victory-native";
-import { PetWithWeights } from "../types";
+import { PetWithWeights } from "../../pets/types";
 
 type Point = {
   day: number;
@@ -35,7 +35,7 @@ interface Props {
   >;
 }
 
-export const PetWeightChart = ({ data, chartPress }: Props) => {
+export const WeightChart = ({ data, chartPress }: Props) => {
   const { state, isActive } = chartPress;
 
   const { width } = Dimensions.get("window");
@@ -56,10 +56,6 @@ export const PetWeightChart = ({ data, chartPress }: Props) => {
   const yAxisfont = useFont(roboto, 12);
 
   const curveType = "monotoneX";
-  const animate = {
-    type: "timing",
-    duration: 500,
-  };
 
   return (
     <View style={{ height: 280, width: width, marginLeft: "auto" }}>
@@ -99,7 +95,10 @@ export const PetWeightChart = ({ data, chartPress }: Props) => {
               points={points.weight}
               curveType={curveType}
               y0={chartBounds.bottom}
-              animate={animate}
+              animate={{
+                type: "timing",
+                duration: 500,
+              }}
             >
               <LinearGradient
                 start={vec(chartBounds.bottom, chartBounds.top)}
@@ -112,7 +111,10 @@ export const PetWeightChart = ({ data, chartPress }: Props) => {
               color="#E97E20"
               curveType={curveType}
               strokeWidth={3}
-              animate={animate}
+              animate={{
+                type: "timing",
+                duration: 500,
+              }}
             />
             {points.weight.length <= 10 && (
               <>
@@ -124,7 +126,10 @@ export const PetWeightChart = ({ data, chartPress }: Props) => {
                   strokeWidth={4}
                   color="#E97E20"
                   opacity={1}
-                  animate={animate}
+                  animate={{
+                    type: "timing",
+                    duration: 500,
+                  }}
                 />
                 <Scatter
                   points={points.weight}
@@ -134,7 +139,10 @@ export const PetWeightChart = ({ data, chartPress }: Props) => {
                   strokeWidth={2}
                   opacity={1}
                   color="#FCD6B0"
-                  animate={animate}
+                  animate={{
+                    type: "timing",
+                    duration: 500,
+                  }}
                 />
               </>
             )}

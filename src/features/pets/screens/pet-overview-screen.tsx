@@ -1,31 +1,26 @@
 import robotoFont from "@/assets/fonts/Roboto/static/Roboto-Bold.ttf";
 import catImage from "@/assets/images/avatars/cat.png";
 import { Card } from "@/components/ui/card";
-import { PetHeader } from "@/features/pet/components/pet-header";
-import { PetWeightChart } from "@/features/pet/components/pet-weight-chart";
-import { useDeletePet } from "@/features/pet/hooks/use-delete-pet";
-import { usePetById } from "@/features/pet/hooks/use-pet-by-id";
+import { PetHeader } from "@/features/pets/components/pet-header";
+import { useDeletePet } from "@/features/pets/hooks/use-delete-pet";
+import { usePetById } from "@/features/pets/hooks/use-pet-by-id";
+import { WeightChart } from "@/features/weights/components/weight-chart";
 import { Canvas, Text as SkText, useFont } from "@shopify/react-native-skia";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { List } from "lucide-react-native";
 import React from "react";
-import { Alert, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Pressable, Text, View } from "react-native";
 import { useDerivedValue } from "react-native-reanimated";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useChartPressState } from "victory-native";
 
-export type RootStackParamList = {
-  petId: number; // params attendus pour cette route
-};
+interface Props {
+  petId: string;
+  petName: string;
+  onBack: () => void;
+}
 
-export default function PetDetail() {
-  const router = useRouter();
-  const { id, name } = useLocalSearchParams<{ id: string; name: string }>();
-
+export const PetOverviewScreen = ({ petId, petName, onBack }: Props) => {
   const chartFont = useFont(robotoFont, 24);
 
   const chartPress = useChartPressState({ x: 0, y: { weight: 0 } });
@@ -41,8 +36,7 @@ export default function PetDetail() {
   const [showSelectedPoint, setShowSelectedPoint] =
     React.useState<boolean>(false);
 
-  const insets = useSafeAreaInsets();
-  const pet = usePetById(Number(id));
+  const pet = usePetById(Number(petId));
   const deletePet = useDeletePet();
 
   if (!pet.data) return <Text>Loading...</Text>;
@@ -57,7 +51,7 @@ export default function PetDetail() {
       <Stack.Screen
         options={{
           headerShown: false,
-          title: name as string,
+          title: petName as string,
         }}
       />
 
@@ -83,8 +77,8 @@ export default function PetDetail() {
             );
           };
           confirmDelete(pet.data.name, async () => {
-            await deletePet(Number(id));
-            router.back();
+            await deletePet(Number(petId));
+            onBack();
           });
         }}
       >
@@ -141,7 +135,7 @@ export default function PetDetail() {
                 //setSelectedPoint(data);
               }}
             /> */}
-            <PetWeightChart data={pet.data} chartPress={chartPress} />
+            <WeightChart data={pet.data} chartPress={chartPress} />
           </>
         )}
       </View>
@@ -183,66 +177,6 @@ export default function PetDetail() {
           </Text>
         </Card>
       </View>
-
-      <View
-        style={{
-          width: "100%",
-          flexDirection: "row",
-          gap: 16,
-          justifyContent: "space-between",
-          alignItems: "center",
-          position: "absolute",
-          bottom: insets.bottom,
-          paddingHorizontal: 20,
-        }}
-      >
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            backgroundColor: "#170D03",
-            borderRadius: 9999,
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 24,
-            height: 68,
-          }}
-          onPress={() => {
-            router.push({
-              pathname: "./add-weight",
-              params: { petId: pet.data?.id, name: pet.data?.name },
-            });
-          }}
-        >
-          <Text
-            style={{ color: "#f7dfc8ff", fontSize: 20, fontWeight: "bold" }}
-          >
-            Nouveau poids
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#EEC399",
-
-            borderRadius: 9999,
-
-            alignItems: "center",
-            justifyContent: "center",
-
-            alignSelf: "center", // centre horizontalement
-            paddingHorizontal: 24,
-            height: 68,
-            width: 68,
-
-            borderWidth: 2,
-            borderColor: "#DBB58E",
-          }}
-          onPress={() => {
-            router.back();
-          }}
-        >
-          <List size={24} strokeWidth={3} color="#3A2109" />
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
-}
+};
