@@ -1,14 +1,16 @@
 import robotoFont from "@/assets/fonts/Roboto/static/Roboto-Bold.ttf";
 import catImage from "@/assets/images/avatars/cat.png";
 import { Card } from "@/components/ui/card";
+import { RangeSelector } from "@/components/ui/range-selector";
 import { PetHeader } from "@/features/pets/components/pet-header";
 import { useDeletePet } from "@/features/pets/hooks/use-delete-pet";
 import { usePetById } from "@/features/pets/hooks/use-pet-by-id";
-import { WeightChart } from "@/features/weights/components/weight-chart";
+import { Point, WeightChart } from "@/features/weights/components/weight-chart";
 import { Canvas, Text as SkText, useFont } from "@shopify/react-native-skia";
+import { endOfDay, startOfDay, subDays, subMonths, subYears } from "date-fns";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
 import { useDerivedValue } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -29,6 +31,12 @@ export const PetOverviewScreen = ({ petId, petName, onBack }: Props) => {
     return chartPress.state.y.weight.value.value.toFixed(1) + " kg";
   }, [chartPress.state]);
 
+  const date = useDerivedValue(() => {
+    return new Date(chartPress.state.x.value.value).toLocaleString();
+  }, [chartPress.state]);
+
+  const [selectedRange, setSelectedRange] = useState("7d");
+
   const [selectedWeight, setSelectedWeight] = React.useState<{
     isActive: boolean;
     value: number | null;
@@ -38,6 +46,42 @@ export const PetOverviewScreen = ({ petId, petName, onBack }: Props) => {
 
   const pet = usePetById(Number(petId));
   const deletePet = useDeletePet();
+
+  const startDate = useMemo(() => {
+    const now = new Date();
+    switch (selectedRange) {
+      case "7d":
+        return startOfDay(subDays(now, 7));
+      case "1m":
+        return startOfDay(subMonths(now, 1));
+      case "6m":
+        return startOfDay(subMonths(now, 6));
+      case "1y":
+        return startOfDay(subYears(now, 1));
+      case "all":
+      default:
+        return undefined;
+    }
+  }, [selectedRange]);
+
+  const endDate = useMemo(() => {
+    if (selectedRange === "all") return undefined;
+    return endOfDay(new Date());
+  }, [selectedRange]);
+
+  const chartData = useMemo(() => {
+    const filtered = pet.data?.weights.filter(
+      (item) =>
+        (!startDate || item.recordedAt >= startDate) &&
+        (!endDate || item.recordedAt <= endDate)
+    );
+    return filtered?.map((w) => {
+      return {
+        day: w.recordedAt.getTime(),
+        weight: Number(w.weightKg),
+      } as Point;
+    });
+  }, [pet.data?.weights, startDate, endDate]);
 
   if (!pet.data) return <Text>Loading...</Text>;
   if (pet.error) throw Error("Pet not found");
@@ -95,7 +139,7 @@ export const PetOverviewScreen = ({ petId, petName, onBack }: Props) => {
         }
         date={showSelectedPoint ? new Date() : null}
       />
-      <Canvas style={{ width: 200 }}>
+      <Canvas style={{ width: 300, height: 30 }}>
         <SkText
           text={chartPress.isActive ? value : ""}
           font={chartFont}
@@ -104,10 +148,18 @@ export const PetOverviewScreen = ({ petId, petName, onBack }: Props) => {
           x={20}
           y={20}
         ></SkText>
+        <SkText
+          text={chartPress.isActive ? date : ""}
+          font={chartFont}
+          color={"#603C18"}
+          opacity={0.6}
+          x={100}
+          y={20}
+        ></SkText>
       </Canvas>
 
       <View>
-        {pet.data.weights.length === 0 ? (
+        {!chartData || chartData.length === 0 ? (
           <Text
             style={{
               textAlign: "center",
@@ -119,24 +171,41 @@ export const PetOverviewScreen = ({ petId, petName, onBack }: Props) => {
             Aucun poids enregistré pour le moment.
           </Text>
         ) : (
-          <>
-            {/* <PetWeightChart
-              data={pet.data}
-              onPointLeave={() => {
-                setShowSelectedPoint(false);
-                // console.log("Pointer left");
-              }}
-              onPointEnter={() => {
-                console.log("Pointer enter");
-                //setShowSelectedPoint(true);
-              }}
-              onPointPress={(data) => {
-                //console.log("Pointer : ", data);
-                //setSelectedPoint(data);
-              }}
-            /> */}
-            <WeightChart data={pet.data} chartPress={chartPress} />
-          </>
+          <View style={{ gap: 20 }}>
+            <WeightChart
+              weightGoal={4}
+              data={chartData}
+              chartPress={chartPress}
+            />
+            <View style={{ paddingHorizontal: 20 }}>
+              <RangeSelector
+                selected={selectedRange}
+                data={[
+                  {
+                    label: "7J",
+                    value: "7d",
+                  },
+                  {
+                    label: "1M",
+                    value: "1m",
+                  },
+                  {
+                    label: "6M",
+                    value: "6m",
+                  },
+                  {
+                    label: "1A",
+                    value: "1y",
+                  },
+                  {
+                    label: "Tout",
+                    value: "all",
+                  },
+                ]}
+                onPress={(value) => setSelectedRange(value)}
+              />
+            </View>
+          </View>
         )}
       </View>
       <View
@@ -152,7 +221,7 @@ export const PetOverviewScreen = ({ petId, petName, onBack }: Props) => {
             gap: 8,
           }}
         >
-          <Card style={{ flex: 1 }}>
+          <Card style={{ flex: 2 }}>
             <Card.Title>Dernière pesée</Card.Title>
             <Text
               style={{ fontSize: 20, fontWeight: "bold", color: "#61482F" }}

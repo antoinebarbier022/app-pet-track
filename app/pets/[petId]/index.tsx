@@ -1,5 +1,5 @@
 import { PetDetailToolbar } from "@/features/pets/components/pet-detail-toolbar";
-import { PetOverviewScreen } from "@/features/pets/screens/pet-overview-screen";
+import { PetOverviewScreen } from "@/screens/pet-overview-screen";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 

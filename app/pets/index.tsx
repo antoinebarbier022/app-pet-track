@@ -1,5 +1,5 @@
 import { PetCreationFab } from "@/features/pets/components/pet-creation-fab";
-import { PetListScreen } from "@/features/pets/screens/pet-list-screen";
+import { PetListScreen } from "@/screens/pet-list-screen";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Text, View } from "react-native";

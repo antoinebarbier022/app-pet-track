@@ -1,4 +1,4 @@
-import { NewPetScreen } from "@/features/pets/screens/new-pet-screen";
+import { NewPetScreen } from "@/screens/new-pet-screen";
 import { useRouter } from "expo-router";
 
 export default function CreatePetRoute() {
